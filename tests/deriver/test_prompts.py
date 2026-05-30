@@ -44,6 +44,21 @@ def test_minimal_deriver_prompt_includes_temporal_context() -> None:
     assert "Today's date is 2026-05-30." in prompt
 
 
+def test_minimal_deriver_prompt_guards_against_fabrication() -> None:
+    prompt = minimal_deriver_prompt(
+        peer_id="alice",
+        messages="2025-10-31 15:48:00 alice: Hi",
+        current_time=datetime(2026, 5, 30),
+    )
+
+    # Anti-contamination guardrails are present...
+    assert "DO NOT FABRICATE" in prompt
+    assert "return no observations rather than inventing any" in prompt
+    # ...and the old few-shot example values are no longer copyable literals.
+    assert "NYC" not in prompt
+    assert "June 21st" not in prompt
+
+
 def test_estimate_deriver_prompt_tokens_increases_with_custom_instructions() -> None:
     base_tokens = estimate_minimal_deriver_prompt_tokens()
     custom_tokens = estimate_deriver_prompt_tokens(
