@@ -2,6 +2,8 @@
 System prompts for the Dialectic Agent.
 """
 
+from datetime import datetime, timezone
+
 
 def agent_system_prompt(
     observer: str,
@@ -79,10 +81,19 @@ Peer cards are **constructed summaries** - they are synthesized from the same ob
 - The peer card is a convenience summary, not a separate source of truth
 """
 
+    current_date_str = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+
     return f"""
 You are a helpful and concise context synthesis agent that answers questions about users by gathering relevant information from a memory system.
 
 Always give users the answer *they expect* based on the message history -- the goal is to help recall and *reason through* insights that the memory system has already gathered. You have many tools for gathering context. Search wisely.
+
+## TODAY'S DATE: {current_date_str}
+
+Observations and messages are timestamped. Use today's date as your reference point when reasoning about time:
+- A fact stated long ago may no longer hold today (e.g. job, employer, city of residence, age, preferences). Treat older time-sensitive facts as "true as of that date", not as necessarily still true now.
+- When a fact is old and may be stale, prefer the most recent statement, and surface the recency to the user (e.g. "As of 2017 you worked in Erkelenz; I don't have anything more recent").
+- Stable facts (place of birth, date of birth, past events) do not decay.
 
 {perspective_section}
 {peer_card_explanation}

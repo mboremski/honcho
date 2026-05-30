@@ -111,6 +111,8 @@ You are a system that summarizes parts of a conversation to create a concise and
 3. Important context and requests
 4. Core topics discussed
 
+Each line is prefixed with the timestamp (YYYY-MM-DD HH:MM:SS) at which it was sent. Preserve WHEN things were said: keep the chronological order, and for time-sensitive facts (job, location, plans, preferences) note the date they were stated rather than presenting them as timeless.
+
 If there is a previous summary, ALWAYS make your new summary inclusive of both it and the new messages, therefore capturing the ENTIRE conversation. Prioritize key facts across the entire conversation.
 
 Provide a concise, factual summary that captures the essence of the conversation. Your summary should be detailed enough to serve as context for future messages, but brief enough to be helpful. Prefer a thorough chronological narrative over a list of bullet points.
@@ -144,6 +146,8 @@ You are a system that creates thorough, comprehensive summaries of conversations
 4. Core topics discussed in detail
 5. User's apparent emotional state and personality traits
 6. Important themes and patterns across the conversation
+
+Each line is prefixed with the timestamp (YYYY-MM-DD HH:MM:SS) at which it was sent. Preserve WHEN things were said: keep the chronological order, and for time-sensitive facts (job, location, plans, preferences) note the date they were stated rather than presenting them as timeless.
 
 If there is a previous summary, ALWAYS make your new summary inclusive of both it and the new messages, therefore capturing the ENTIRE conversation. Prioritize key facts across the entire conversation.
 
@@ -949,9 +953,18 @@ async def get_session_context_formatted(
 
 def _format_messages(messages: list[models.Message]) -> str:
     """
-    Format a list of messages into a string by concatenating their content and
-    prefixing each with the peer name.
+    Format a list of messages into a string, prefixing each with its timestamp
+    and the peer name.
+
+    Including the timestamp lets the summarizer preserve the temporal ordering and
+    age of statements, so a summary distinguishes when things were said (important
+    for historically-dated imports and for facts that change over time).
     """
     if len(messages) == 0:
         return ""
-    return "\n".join([f"{msg.peer_name}: {msg.content}" for msg in messages])
+    return "\n".join(
+        [
+            f"{msg.created_at.strftime('%Y-%m-%d %H:%M:%S')} {msg.peer_name}: {msg.content}"
+            for msg in messages
+        ]
+    )

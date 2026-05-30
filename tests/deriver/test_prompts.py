@@ -1,3 +1,4 @@
+from datetime import datetime
 from unittest.mock import patch
 
 import pytest
@@ -13,6 +14,7 @@ def test_minimal_deriver_prompt_includes_custom_instructions_when_present() -> N
     prompt = minimal_deriver_prompt(
         peer_id="alice",
         messages="alice: hello",
+        current_time=datetime(2025, 1, 1),
         custom_instructions="Prefer concrete timeline facts.",
     )
 
@@ -24,10 +26,22 @@ def test_minimal_deriver_prompt_omits_custom_instructions_when_absent() -> None:
     prompt = minimal_deriver_prompt(
         peer_id="alice",
         messages="alice: hello",
+        current_time=datetime(2025, 1, 1),
         custom_instructions=None,
     )
 
     assert "CUSTOM INSTRUCTIONS:" not in prompt
+
+
+def test_minimal_deriver_prompt_includes_temporal_context() -> None:
+    prompt = minimal_deriver_prompt(
+        peer_id="alice",
+        messages="2017-03-08 13:56:00 alice: I work in Erkelenz",
+        current_time=datetime(2026, 5, 30),
+    )
+
+    assert "TEMPORAL CONTEXT:" in prompt
+    assert "Today's date is 2026-05-30." in prompt
 
 
 def test_estimate_deriver_prompt_tokens_increases_with_custom_instructions() -> None:

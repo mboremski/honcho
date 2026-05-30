@@ -1,5 +1,6 @@
 import logging
 import time
+from datetime import datetime, timezone
 
 from src import crud
 from src.config import ConfiguredModelSettings, settings
@@ -121,10 +122,12 @@ async def process_representation_tasks_batch(
         },
     )
 
-    # Build prompt
+    # Build prompt. Pass the current time so the model can anchor extracted facts
+    # to "now" and qualify potentially-stale facts from historically-dated imports.
     prompt = minimal_deriver_prompt(
         peer_id=observed,
         messages=formatted_messages,
+        current_time=datetime.now(timezone.utc),
         custom_instructions=custom_instructions,
     )
 
